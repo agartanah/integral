@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,14 +71,14 @@ namespace integral {
       }
     }
 
-    public static double RectangleMethodConcreteN(double a, double b, double e, int N) {
+    public static double RectangleMethodConcreteN(double a, double b, double e, double N) {
       double lengthSigment = b - a;
       double step;
       double valintegral2 = 0;
 
       step = lengthSigment / N;
 
-      for (double x = a; x < b; x += step) {
+      for (double x = a; x <= b - step; x += step) {
         valintegral2 += step * Fun(x);
       }
 
@@ -88,39 +89,95 @@ namespace integral {
     }
 
     public static double RectangleMethod(double a, double b, double e) {
-      double countPartitions = 1;
+      double N = 1d / 2d;
       double lengthSigment = b - a;
       double step;
-      double valIntegral1;
-      double valIntegral2 = 0;
+      double valIntegral1 = RectangleMethodConcreteN(a, b, e, N *= 2);
+      double valIntegral2 = valIntegral1;
 
       do {
-        countPartitions *= 2;
+        N *= 2;
         valIntegral1 = valIntegral2;
         valIntegral2 = 0;
 
-        step = lengthSigment / countPartitions;
+        step = lengthSigment / N;
 
-        for (double x = a; x < b; x += step) {
+        for (double x = a; x <= b - step; x += step) {
           valIntegral2 += step * Fun(x);
         }
-      } while (Math.Abs(valIntegral2 - valIntegral1) > e);
+      } while (Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)))
+      - Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e)))) > 0);
 
-      countN[0] = countPartitions;
-      result[0] = valIntegral2;
+      if (N == 1) {
+        countN[0] = N;
+      } else {
+        countN[0] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 4, N / 2, valIntegral2);
 
-      return valIntegral2;
+        if (countN[0] == -1) {
+          countN[0] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
+        }
+      }
+
+      result[0] = RectangleMethodConcreteN(a, b, e, countN[0]);
+
+      return result[0];
     }
 
-    public static double TrapezoidMethodConcreteN(double a, double b, double e, int N) {
+    private static double SearchN(Func<double, double, double, double, double> integralMethod,
+      double a, double b, double e, double left, double right, double valintegral, bool flag = true) {
+      double N = (left + right) / 2;
+
+      if (Math.Abs(right - left) <= 2) {
+        if (!flag) {
+          return -1;
+        }
+
+        if (Math.Abs(Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)) + 1)
+          - Math.Round((decimal)integralMethod(a, b, e, left), Math.Abs((int)Math.Log10(e)) + 1)) <= (decimal)e) {
+          return left;
+        } else if (Math.Abs(Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)) + 1)
+          - Math.Round((decimal)integralMethod(a, b, e, N), Math.Abs((int)Math.Log10(e)) + 1)) <= (decimal)e) {
+          return N;
+        } else if (Math.Abs(Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)) + 1)
+          - Math.Round((decimal)integralMethod(a, b, e, right), Math.Abs((int)Math.Log10(e)) + 1)) <= (decimal)e) {
+          return right;
+        }
+      }
+
+      if (Math.Abs(Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)) + 1)
+          - Math.Round((decimal)integralMethod(a, b, e, N), Math.Abs((int)Math.Log10(e)) + 1)) <= (decimal)e) {
+        N = SearchN(integralMethod, a, b, e, left, N, valintegral, true);
+      } else {
+        double N1 = SearchN(integralMethod, a, b, e, left, N, valintegral, false);
+        double N2;
+
+        if (N1 != -1) {
+          N = N1;
+        } else {
+          N2 = SearchN(integralMethod, a, b, e, N, right, valintegral, false);
+          
+          if (N2 != -1) {
+            N = N2;
+          }
+        }
+      }
+
+      return N;
+    }
+
+    public static double TrapezoidMethodConcreteN(double a, double b, double e, double N) {
       double lengthSigment = b - a;
       double step;
       double valIntegral2 = 0;
 
       step = lengthSigment / N;
 
-      for (double x = a; x < b; x += step) {
+      int k = 0;
+
+      for (double x = a; x <= b - step; x += step) {
         valIntegral2 += ((Fun(x) + Fun(x + step)) / 2) * step;
+
+        ++k;
       }
 
       countN[1] = N;
@@ -130,49 +187,70 @@ namespace integral {
     }
 
     public static double TrapezoidMethod(double a, double b, double e) {
-      double countPartitions = 1;
+      double N = 1d / 2d;
       double lengthSigment = b - a;
       double step;
-      double valIntegral1;
-      double valIntegral2 = 0;
+      double valIntegral1 = TrapezoidMethodConcreteN(a, b, e, N *= 2);
+      double valIntegral2 = valIntegral1;
 
       do {
-        countPartitions *= 2;
+        N *= 2;
         valIntegral1 = valIntegral2;
         valIntegral2 = 0;
 
-        step = lengthSigment / countPartitions;
+        step = lengthSigment / N;
 
-        for (double x = a; x < b; x += step) {
+        for (double x = a; x <= b - step; x += step) {
           valIntegral2 += ((Fun(x) + Fun(x + step)) / 2) * step;
         }
-      } while (Math.Abs(valIntegral2 - valIntegral1) > e);
 
-      countN[1] = countPartitions;
-      result[1] = valIntegral2;
+        decimal bruh = Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)) + 1) - Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e)) + 1));
+      } while (Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)) + 1)
+      - Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e)) + 1)) >= (decimal)e);
+
+      if (N == 1) {
+        countN[1] = N;
+      } else {
+        countN[1] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 4, N / 2, valIntegral2);
+
+        if (countN[1] == -1) {
+          countN[1] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
+        }
+      }
+
+      result[1] = TrapezoidMethodConcreteN(a, b, e, countN[1]);
 
       return valIntegral2;
     }
 
-    public static double SimpsonMethodConcreteN(double a, double b, double e, int N) {
+    public static double SimpsonMethodConcreteN(double a, double b, double e, double N) {
       double valIntegral2;
 
-      double step = (b - a) / N;
-      double sum1 = 0d;
-      double sum2 = 0d;
+      double step = (b - a) / (N);
+      double summOdd = 0d;
+      double summEven = 0d;
 
-      for (var indexN = 1; indexN <= N; indexN++) {
-        var xk = a + indexN * step;
+      double indexN = 1;
+
+      while (indexN < N) {
+        var odd = a + step * indexN;
 
         if (indexN <= N - 1) {
-          sum1 += Fun(xk);
+          summOdd += Fun(odd);
+
+          indexN++;
         }
 
-        var xk_1 = a + (indexN - 1) * step;
-        sum2 += Fun((xk + xk_1) / 2);
+        var even = a + step * indexN;
+
+        if (indexN <= N - 2) {
+          summEven += Fun(even);
+
+          indexN++;
+        }
       }
 
-      valIntegral2 = step / 3d * (1d / 2d * Fun(a) + sum1 + 2 * sum2 + 1d / 2d * Fun(b));
+      valIntegral2 = (step / 3d) * (Fun(a) + 4 * summOdd + 2 * summEven + Fun(b));
 
       countN[2] = N;
       result[2] = valIntegral2;
@@ -182,34 +260,72 @@ namespace integral {
     }
 
     public static double SimpsonMethod(double a, double b, double e) {
-      int countPartitions = 1;
-      double valIntegral1;
-      double valIntegral2 = 0;
+      double N = 1;
+      double step;
+      double valIntegral1 = SimpsonMethodConcreteN(a, b, e, N *= 2);
+      double valIntegral2 = valIntegral1;
 
       do {
-        countPartitions *= 2;
+        N = 2 * N;
+        step = (b - a) / (N);
+        double summOdd = 0d;
+        double summEven = 0d;
         valIntegral1 = valIntegral2;
         valIntegral2 = 0;
+        double indexN = 1;
 
-        double step = (b - a) / countPartitions;
-        double sum1 = 0d;
-        double sum2 = 0d;
+        while (indexN < N) {
+          var odd = a + step * indexN;
 
-        for (var indexN = 1; indexN <= countPartitions; indexN++) {
-          var xk = a + indexN * step;
-          if (indexN <= countPartitions - 1) {
-            sum1 += Fun(xk);
+          if (indexN <= N - 1) {
+            summOdd += Fun(odd);
+
+            indexN++;
           }
 
-          var xk_1 = a + (indexN - 1) * step;
-          sum2 += Fun((xk + xk_1) / 2);
+          var even = a + step * indexN;
+
+          if (indexN <= N - 2) {
+            summEven += Fun(even);
+
+            indexN++;
+          }
         }
 
-        valIntegral2 = step / 3d * (1d / 2d * Fun(a) + sum1 + 2 * sum2 + 1d / 2d * Fun(b));
-      } while ((1d / 3d) * Math.Abs(valIntegral2 - valIntegral1) > e);
+        valIntegral2 = (step / 3d) * (Fun(a) + 4 * summOdd + 2 * summEven + Fun(b));
+      } while ((1m / 3m) * Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)))
+      - Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e)))) > 0);
       
-      countN[2] = countPartitions;
-      result[2] = valIntegral2;
+      if (N == 1 && SimpsonMethodConcreteN(a, b, e, countN[2]) == 0) {
+        ++N;
+        countN[2] = N;
+      } else if (N == 2) {
+        countN[2] = N;
+      } else {
+        if (N >= 8) {
+          countN[2] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 4, N / 2, valIntegral2);
+
+          if (countN[2] == -1) {
+            countN[2] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
+          }
+        } else {
+          countN[2] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
+        }
+      }
+
+      
+      if (countN[2] % 2 != 0) {
+        if (Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)))
+          - Math.Round((decimal)SimpsonMethodConcreteN(a, b, e, countN[2] - 1), Math.Abs((int)Math.Log10(e)))) < (decimal)e) {
+          ++countN[2];
+          countN[2] = countN[2] - 1;
+        } else if (Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)))
+          - Math.Round((decimal)SimpsonMethodConcreteN(a, b, e, countN[2] + 1), Math.Abs((int)Math.Log10(e)))) < (decimal)e) {
+          countN[2] = countN[2] + 1;
+        }
+      }
+
+      result[2] = SimpsonMethodConcreteN(a, b, e, countN[2]);
 
       return valIntegral2;
     }

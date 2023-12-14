@@ -37,40 +37,40 @@ namespace FunctionParser {
       double ret = 0;
       switch (Func) {
         case FunctionEnum.Sin:
-          ret = Math.Sin(termValue * Math.PI / 180);
+          ret = Math.Sin(termValue);
           break;
         case FunctionEnum.Cos:
-          ret = Math.Sin(termValue * Math.PI / 180);
+          ret = Math.Sin(termValue);
           break;
         case FunctionEnum.Tan:
-          ret = Math.Tan(termValue * Math.PI / 180);
+          ret = Math.Tan(termValue);
           break;
         case FunctionEnum.Sinh:
-          ret = Math.Sinh(termValue * Math.PI / 180);
+          ret = Math.Sinh(termValue);
           break;
         case FunctionEnum.Cosh:
-          ret = Math.Cosh(termValue * Math.PI / 180);
+          ret = Math.Cosh(termValue);
           break;
         case FunctionEnum.Tanh:
-          ret = Math.Tanh(termValue * Math.PI / 180);
+          ret = Math.Tanh(termValue);
           break;
         case FunctionEnum.Csc:
-          ret = (1 / Math.Sin(termValue * Math.PI / 180));
+          ret = (1 / Math.Sin(termValue));
           break;
         case FunctionEnum.Sic:
-          ret = (1 / Math.Cos(termValue * Math.PI / 180));
+          ret = (1 / Math.Cos(termValue));
           break;
         case FunctionEnum.Cot:
-          ret = (1 / Math.Tan(termValue * Math.PI / 180));
+          ret = (1 / Math.Tan(termValue));
           break;
         case FunctionEnum.Csch:
-          ret = (1 / Math.Sinh(termValue * Math.PI / 180));
+          ret = (1 / Math.Sinh(termValue));
           break;
         case FunctionEnum.Sich:
-          ret = (1 / Math.Cosh(termValue * Math.PI / 180));
+          ret = (1 / Math.Cosh(termValue));
           break;
         case FunctionEnum.Coth:
-          ret = (1 / Math.Tanh(termValue * Math.PI / 180));
+          ret = (1 / Math.Tanh(termValue));
           break;
         case FunctionEnum.E:
           ret = (Math.Exp(termValue));

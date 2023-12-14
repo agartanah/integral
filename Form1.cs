@@ -28,20 +28,32 @@ namespace integral {
       result.Text = string.Empty;
       labelCondition.Text = string.Empty;
 
-      IntegralMethods.idsNames = new string[] { "x", "e" };
-      IntegralMethods.idsValues = new double[] { default, Math.E };
+      IntegralMethods.idsNames = new string[] { "x", "e", "pi" };
+      IntegralMethods.idsValues = new double[] { default, Math.E, Math.PI };
     }
 
     private void button1_Click(object sender, EventArgs e) {
       labelCondition.Text = string.Empty;
 
-      if (!double.TryParse(textBoxA.Text, out a)) {
+      if (FunctionParser.Expression.IsExpression(textBoxA.Text + "+0*x", IntegralMethods.idsNames)) {
+        FunctionParser.Expression expression = new FunctionParser.Expression(textBoxA.Text + "+0*x", IntegralMethods.idsNames, null);
+
+        IntegralMethods.idsValues[0] = 0d;
+
+        a = expression.CalculateValue(IntegralMethods.idsValues);
+      } else if (!double.TryParse(textBoxA.Text, out a)) {
         labelCondition.Text = "Неправильный формат данных для значения a !!!\n\n";
 
         return;
       }
 
-      if (!double.TryParse(textBoxB.Text, out b)) {
+      if (FunctionParser.Expression.IsExpression(textBoxB.Text + "+0*x", IntegralMethods.idsNames)) {
+        FunctionParser.Expression expression = new FunctionParser.Expression(textBoxB.Text + "+0*x", IntegralMethods.idsNames, null);
+
+        IntegralMethods.idsValues[0] = 0d;
+
+        b = expression.CalculateValue(IntegralMethods.idsValues);
+      } else if (!double.TryParse(textBoxB.Text, out b)) {
         labelCondition.Text = "Неправильный формат данных для значения b !!!\n\n";
 
         return;
@@ -79,31 +91,7 @@ namespace integral {
 
       if (hasN == true) {
         if (checkBox1.Checked) {
-          double integralValue = Math.Round((double)IntegralMethods.RectangleMethodConcreteN(a, b, this.e, N), Math.Abs((int)Math.Log10(this.e)) + 1);
-
-          result.Text = integralValue.ToString() + "\n";
-
-          labelCondition.Text += $"Количество разбиений Методом Прямоугольника: {IntegralMethods.countN[0].ToString()}\n";
-        }
-
-        if (checkBox2.Checked) {
-          double integralValue = Math.Round((double)IntegralMethods.TrapezoidMethodConcreteN(a, b, this.e, N), Math.Abs((int)Math.Log10(this.e)) + 1);
-
-          result.Text = integralValue.ToString();
-
-          labelCondition.Text += $"Количество разбиений Методом Трапеций: {IntegralMethods.countN[1].ToString()}\n";
-        }
-
-        if (checkBox3.Checked) {
-          double integralValue = Math.Round((double)IntegralMethods.SimpsonMethodConcreteN(a, b, this.e, N), Math.Abs((int)Math.Log10(this.e)) + 1);
-
-          result.Text = integralValue.ToString();
-
-          labelCondition.Text += $"Количество разбиений Методом Симпсона: {IntegralMethods.countN[2].ToString()}\n";
-        }
-      } else {
-        if (checkBox1.Checked) {
-          double integralValue = Math.Round((double)IntegralMethods.RectangleMethod(a, b, this.e), Math.Abs((int)Math.Log10(this.e)) + 1);
+          double integralValue = Math.Round((double)IntegralMethods.RectangleMethodConcreteN(a, b, this.e, N), Math.Abs((int)Math.Log10(this.e)));
 
           result.Text = integralValue.ToString() + "\n";
 
@@ -112,7 +100,7 @@ namespace integral {
         }
 
         if (checkBox2.Checked) {
-          double integralValue = Math.Round((double)IntegralMethods.TrapezoidMethod(a, b, this.e), Math.Abs((int)Math.Log10(this.e)) + 1);
+          double integralValue = Math.Round((double)IntegralMethods.TrapezoidMethodConcreteN(a, b, this.e, N), Math.Abs((int)Math.Log10(this.e)));
 
           result.Text = integralValue.ToString();
 
@@ -121,7 +109,34 @@ namespace integral {
         }
 
         if (checkBox3.Checked) {
-          double integralValue = Math.Round((double)IntegralMethods.SimpsonMethod(a, b, this.e), Math.Abs((int)Math.Log10(this.e)) + 1);
+          double integralValue = Math.Round((double)IntegralMethods.SimpsonMethodConcreteN(a, b, this.e, N), Math.Abs((int)Math.Log10(this.e)));
+
+          result.Text = integralValue.ToString();
+
+          labelCondition.Text += $"Количество разбиений Методом Симпсона:" +
+            $" {IntegralMethods.countN[2].ToString()}\nРезультат: {IntegralMethods.result[2]}\n";
+        }
+      } else {
+        if (checkBox1.Checked) {
+          double integralValue = Math.Round((double)IntegralMethods.RectangleMethod(a, b, this.e), Math.Abs((int)Math.Log10(this.e)));
+
+          result.Text = integralValue.ToString() + "\n";
+
+          labelCondition.Text += $"Количество разбиений Методом Прямоугольника:" +
+            $" {IntegralMethods.countN[0].ToString()}\nРезультат: {IntegralMethods.result[0]}\n";
+        }
+
+        if (checkBox2.Checked) {
+          double integralValue = Math.Round((double)IntegralMethods.TrapezoidMethod(a, b, this.e), Math.Abs((int)Math.Log10(this.e)));
+
+          result.Text = integralValue.ToString();
+
+          labelCondition.Text += $"Количество разбиений Методом Трапеций:" +
+            $" {IntegralMethods.countN[1].ToString()}\nРезультат: {IntegralMethods.result[1]}\n";
+        }
+
+        if (checkBox3.Checked) {
+          double integralValue = Math.Round((double)IntegralMethods.SimpsonMethod(a, b, this.e), Math.Abs((int)Math.Log10(this.e)));
 
           result.Text = integralValue.ToString();
 
@@ -130,6 +145,18 @@ namespace integral {
         }
       }
 
+      double maxCountN = Math.Max(Math.Max(IntegralMethods.countN[0], IntegralMethods.countN[1]), IntegralMethods.countN[2]);
+
+      if (maxCountN % 2 != 0) { // для симпсона
+        ++maxCountN;
+      }
+
+      if (checkBox1.Checked && checkBox2.Checked && checkBox3.Checked && !hasN) {
+        labelCondition.Text += $"\nОптимальное N для всех методов: {maxCountN}\n";
+        labelCondition.Text += $"Результат Метода Прямоугольников при N = {maxCountN}: {IntegralMethods.RectangleMethodConcreteN(a, b, this.e, maxCountN)}\n";
+        labelCondition.Text += $"Результат Метода Трапеций при N = {maxCountN}: {IntegralMethods.TrapezoidMethodConcreteN(a, b, this.e, maxCountN)}\n";
+        labelCondition.Text += $"Результат Метода Симпсона при N = {maxCountN}: {IntegralMethods.SimpsonMethodConcreteN(a, b, this.e, maxCountN)}\n";
+      }
       PaintFun();
     }
 

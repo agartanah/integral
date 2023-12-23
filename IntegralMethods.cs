@@ -105,16 +105,19 @@ namespace integral {
         for (double x = a; x <= b - step; x += step) {
           valIntegral2 += step * Fun(x);
         }
-      } while (Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)))
-      - Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e)))) > 0);
+      } while (Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e))) != Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e))));
 
       if (N == 1) {
         countN[0] = N;
       } else {
-        countN[0] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 4, N / 2, valIntegral2);
+        if (N != 2) {
+          countN[1] = SearchN(RectangleMethodConcreteN, a, b, e, N / 4, N / 2, valIntegral2);
 
-        if (countN[0] == -1) {
-          countN[0] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
+          if (countN[1] == -1) {
+            countN[1] = SearchN(RectangleMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
+          }
+        } else {
+          countN[1] = SearchN(RectangleMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
         }
       }
 
@@ -132,20 +135,24 @@ namespace integral {
           return -1;
         }
 
-        if (Math.Abs(Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)) + 1)
-          - Math.Round((decimal)integralMethod(a, b, e, left), Math.Abs((int)Math.Log10(e)) + 1)) <= (decimal)e) {
+        decimal bruh1 = Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)));
+        decimal bruhleft = (decimal)integralMethod(a, b, e, left);
+        decimal bruhLeft = Math.Round((decimal)integralMethod(a, b, e, left), Math.Abs((int)Math.Log10(e)));
+        decimal bruhn = (decimal)integralMethod(a, b, e, N);
+        decimal bruhN = Math.Round((decimal)integralMethod(a, b, e, N), Math.Abs((int)Math.Log10(e)));
+        decimal bruhright = (decimal)integralMethod(a, b, e, right);
+        decimal bruhRight = Math.Round((decimal)integralMethod(a, b, e, right), Math.Abs((int)Math.Log10(e)));
+
+        if (Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e))) == Math.Round((decimal)integralMethod(a, b, e, left), Math.Abs((int)Math.Log10(e)))) {
           return left;
-        } else if (Math.Abs(Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)) + 1)
-          - Math.Round((decimal)integralMethod(a, b, e, N), Math.Abs((int)Math.Log10(e)) + 1)) <= (decimal)e) {
+        } else if (Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e))) == Math.Round((decimal)integralMethod(a, b, e, N), Math.Abs((int)Math.Log10(e)))) {
           return N;
-        } else if (Math.Abs(Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)) + 1)
-          - Math.Round((decimal)integralMethod(a, b, e, right), Math.Abs((int)Math.Log10(e)) + 1)) <= (decimal)e) {
+        } else if (Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e))) == Math.Round((decimal)integralMethod(a, b, e, right), Math.Abs((int)Math.Log10(e)))) {
           return right;
         }
       }
 
-      if (Math.Abs(Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e)) + 1)
-          - Math.Round((decimal)integralMethod(a, b, e, N), Math.Abs((int)Math.Log10(e)) + 1)) <= (decimal)e) {
+      if (Math.Round((decimal)valintegral, Math.Abs((int)Math.Log10(e))) == Math.Round((decimal)integralMethod(a, b, e, N), Math.Abs((int)Math.Log10(e)))) {
         N = SearchN(integralMethod, a, b, e, left, N, valintegral, true);
       } else {
         double N1 = SearchN(integralMethod, a, b, e, left, N, valintegral, false);
@@ -158,6 +165,8 @@ namespace integral {
           
           if (N2 != -1) {
             N = N2;
+          } else {
+            return -1;
           }
         }
       }
@@ -205,22 +214,28 @@ namespace integral {
         }
 
         decimal bruh = Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)) + 1) - Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e)) + 1));
-      } while (Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)) + 1)
-      - Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e)) + 1)) >= (decimal)e);
+      } while (Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e))) != Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e))));
+      
+      //  while (Math.Abs(Math.Round((decimal)valIntegral2, Math.Abs((int)Math.Log10(e)) + 1)
+      //- Math.Round((decimal)valIntegral1, Math.Abs((int)Math.Log10(e)) + 1)) >= (decimal)e);
 
       if (N == 1) {
         countN[1] = N;
       } else {
-        countN[1] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 4, N / 2, valIntegral2);
+        if (N != 2) {
+          countN[1] = SearchN(TrapezoidMethodConcreteN, a, b, e, N / 4, N / 2, valIntegral2);
 
-        if (countN[1] == -1) {
-          countN[1] = SearchN(SimpsonMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
+          if (countN[1] == -1) {
+            countN[1] = SearchN(TrapezoidMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
+          }
+        } else {
+          countN[1] = SearchN(TrapezoidMethodConcreteN, a, b, e, N / 2, N, valIntegral2);
         }
       }
 
       result[1] = TrapezoidMethodConcreteN(a, b, e, countN[1]);
 
-      return valIntegral2;
+      return result[1];
     }
 
     public static double SimpsonMethodConcreteN(double a, double b, double e, double N) {
@@ -327,7 +342,7 @@ namespace integral {
 
       result[2] = SimpsonMethodConcreteN(a, b, e, countN[2]);
 
-      return valIntegral2;
+      return result[2];
     }
   }
 }
